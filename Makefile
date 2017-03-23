@@ -1,6 +1,9 @@
-YOCTOCXXFLAGS=-I$(PKG_CONFIG_SYSROOT_DIR)/usr/include/iotivity/resource/ -I$(PKG_CONFIG_SYSROOT_DIR)/usr/include/iotivity/resource/stack -I$(PKG_CONFIG_SYSROOT_DIR)/usr/include/iotivity/resource/ocrandom -I$(PKG_CONFIG_SYSROOT_DIR)/usr/include/iotivity/resource/logger -I$(PKG_CONFIG_SYSROOT_DIR)/usr/include/iotivity/resource/oc_logger
+PKG_CONFIG?=pkg-config
 
-YOCTOLDFLAGS=-loc -loctbstack -loc_logger 
+YOCTOCXXFLAGS+=$(shell $(PKG_CONFIG) iotivity --cflags)
+YOCTOCXXFLAGS+=-std=c++0x
+
+YOCTOLDFLAGS+=$(shell $(PKG_CONFIG) iotivity --libs)
 
 all: simpleclient
 
@@ -9,7 +12,7 @@ ifeq ($(PKG_CONFIG_SYSROOT_DIR),)
 	echo "Error: Yocto cross-toolchain environment not initialized"
 	exit 1 
 endif
-	$(CXX) -std=c++0x -c -o $@ $< $(YOCTOCXXFLAGS)
+	$(CXX) -c -o $@ $< $(YOCTOCXXFLAGS)
 
 simpleclient: simpleclient.o
 	$(CXX) -o $@ $^ $(LDFLAGS) $(YOCTOLDFLAGS)
