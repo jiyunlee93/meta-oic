@@ -42,7 +42,8 @@ rule/image: rule/bitbake/build/${image} rule/override/list-images
 
 ${build_dir}/${package}-depends.dot: ${build_dir}/conf rule/override/sources_dir
 	${MAKE} rule/env-exec/bitbake ARGS="-g ${package}"
-	mv ${build_dir}/recipe-depends.dot "$@"
+	@echo "TODO: port older versions of yocto"
+	-mv ${build_dir}/recipe-depends.dot "$@"
 
 ${build_dir}/${package}-env.log: ${build_dir}/conf rule/override/sources_dir
 	${MAKE} rule/env-exec/bitbake ARGS="-e ${package}" > $@
