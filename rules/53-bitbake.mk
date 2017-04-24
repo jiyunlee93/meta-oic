@@ -23,12 +23,13 @@ rule/bitbake/rebuild/%: rule/bitbake/cleanall/% rule/bitbake/build/%
 rule/print/package/%: rule/done/configure ${build_dir}/conf ${sources_dir}
 	rm -f ${build_dir}/${@F}-depends.dot
 	${MAKE} ${build_dir}/${@F}-depends.dot package="${@F}"
-	cat ${build_dir}/${@F}-depends.dot \
+	@echo "TODO: port older versions of yocto"
+	-cat ${build_dir}/${@F}-depends.dot \
 	| grep -v -e '-native' \
 	| grep -v digraph \
 	| awk '{print $1}' | sort | uniq | grep "${@F}"
-	${MAKE} ${build_dir}/${@F}-env.log package="${@F}"
-	cat ${build_dir}/${@F}-env.log | grep "${@F}"
+	-${MAKE} ${build_dir}/${@F}-env.log package="${@F}"
+	-cat ${build_dir}/${@F}-env.log | grep "${@F}"
 
 rule/print-image: rule/print/package/${image}
 	@echo "log: $@: $^"
