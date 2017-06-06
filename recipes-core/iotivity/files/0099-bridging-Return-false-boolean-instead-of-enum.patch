@@ -1,0 +1,40 @@
+From 45a915954650b0c2f5752ae9e958a194d2483852 Mon Sep 17 00:00:00 2001
+From: Philippe Coval <philippe.coval@osg.samsung.com>
+Date: Wed, 28 Jun 2017 04:54:05 +0200
+Subject: [PATCH 099/169] bridging: Return false boolean instead of enum
+
+Small Fix to support g++-7.1.0
+
+It was tested on yocto poky master on iotivity-1.3.0 (and later):
+
+  bridging/plugins/nest_plugin/nest_objects/nest.cpp: \
+  In member function 'bool Nest::isAuthorized()':
+  bridging/plugins/nest_plugin/nest_objects/nest.cpp:95:16: \
+  error: enum constant in boolean context [-Werror=int-in-bool-context]
+
+Change-Id: Ib53aa7be0198cd926b6901b173001910a324633e
+Signed-off-by: Philippe Coval <philippe.coval@osg.samsung.com>
+Reviewed-on: https://gerrit.iotivity.org/gerrit/21071
+Tested-by: jenkins-iotivity <jenkins@iotivity.org>
+Reviewed-by: Dan Mihai <Daniel.Mihai@microsoft.com>
+Reviewed-by: Todd Malsbary <todd.malsbary@intel.com>
+---
+ bridging/plugins/nest_plugin/nest_objects/nest.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/bridging/plugins/nest_plugin/nest_objects/nest.cpp b/bridging/plugins/nest_plugin/nest_objects/nest.cpp
+index 780d6e9..8b40848 100644
+--- a/bridging/plugins/nest_plugin/nest_objects/nest.cpp
++++ b/bridging/plugins/nest_plugin/nest_objects/nest.cpp
+@@ -92,7 +92,7 @@ bool Nest::isAuthorized()
+     if (curlCode != MPM_RESULT_OK)
+     {
+         OIC_LOG_V(ERROR, TAG, "Curl GET Request operation failed. Error code %d", curlCode);
+-        return MPM_RESULT_INTERNAL_ERROR;
++        return false;
+     }
+ 
+     if (MPM_RESULT_OK != parseStructureJsonResponse(response, m_metaInfo))
+-- 
+1.9.1
+
