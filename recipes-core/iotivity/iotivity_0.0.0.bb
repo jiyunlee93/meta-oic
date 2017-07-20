@@ -1,7 +1,7 @@
 # TODO:
 # echo 'PREFERRED_VERSION_iotivity="0.0.0"' >> build/conf/local.conf
 
-PR = "r01"
+PR = "r03"
 #SRCREV  = "${AUTOREV}"
 #PV = "0+git${SRCPV}"
 #S  = "${WORKDIR}/git"
@@ -25,11 +25,12 @@ branch_iotivity = "master"
 #branch_iotivity = "sandbox/pcoval/on/${branch_iotivity}/patch"
 #branch_iotivity = "sandbox/pcoval/on/master/patch"
 #SRCREV = "${branch_iotivity}"
-#SRC_URI = "git://github.com/tizenteam/iotivity.git;destsuffix=${S};branch=${branch_iotivity};protocol=http;"
+#SRC_URI = "git://github.com/tizenteam/iotivity.git;destsuffix=${S};branch=${branch_iotivity};protocol=http"
 #SRC_URI = "git:///home/user/mnt/iotivity;destsuffix=${S};branch=${branch_iotivity};protocol=file"
 #} TODO
-SRCREV ?= "${branch_iotivity}"
-SRC_URI ?= "git://github.com/iotivity/iotivity.git;destsuffix=${S};branch=${branch_iotivity};protocol=http;"
+SRCREV = "${branch_iotivity}"
+SRC_URI = "git://github.com/iotivity/iotivity.git;destsuffix=${S};branch=${branch_iotivity};protocol=http;"
+SRC_URI += "file://0189-resource-Include-functional-header-for-g-7.1.0.patch"
 
 url_tinycbor = "git://github.com/01org/tinycbor.git"
 SRCREV_tinycbor = "31c7f81d45d115d2007b1c881cbbd3a19618465c"
