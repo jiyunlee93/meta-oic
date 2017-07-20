@@ -1,7 +1,7 @@
 # TODO:
 # echo 'PREFERRED_VERSION_iotivity="0.0.0"' >> build/conf/local.conf
 
-PR = "r0"
+PR = "r01"
 #SRCREV  = "${AUTOREV}"
 #PV = "0+git${SRCPV}"
 #S  = "${WORKDIR}/git"
@@ -18,10 +18,8 @@ LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE.md;md5=22bf216f3077c279aed7b36b1fa9e6d1"
 
 branch_iotivity = "master"
-SRC_URI = "git://github.com/iotivity/iotivity.git;destsuffix=${S};branch=${branch_iotivity};protocol=http;"
 #{ TODO
 #branch_iotivity = "1.3-rel"
-#SRCREV = "${branch_iotivity}"
 #branch_iotivity = "sandbox/pcoval/on/master/yocto"
 #branch_iotivity = "sandbox/pcoval/on/next/patch"
 #branch_iotivity = "sandbox/pcoval/on/${branch_iotivity}/patch"
@@ -30,6 +28,8 @@ SRC_URI = "git://github.com/iotivity/iotivity.git;destsuffix=${S};branch=${branc
 #SRC_URI = "git://github.com/tizenteam/iotivity.git;destsuffix=${S};branch=${branch_iotivity};protocol=http;"
 #SRC_URI = "git:///home/user/mnt/iotivity;destsuffix=${S};branch=${branch_iotivity};protocol=file"
 #} TODO
+SRCREV ?= "${branch_iotivity}"
+SRC_URI ?= "git://github.com/iotivity/iotivity.git;destsuffix=${S};branch=${branch_iotivity};protocol=http;"
 
 url_tinycbor = "git://github.com/01org/tinycbor.git"
 SRCREV_tinycbor = "31c7f81d45d115d2007b1c881cbbd3a19618465c"
