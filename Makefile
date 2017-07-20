@@ -1,19 +1,17 @@
-YOCTOCXXFLAGS=-I$(PKG_CONFIG_SYSROOT_DIR)/usr/include/iotivity/resource/ -I$(PKG_CONFIG_SYSROOT_DIR)/usr/include/iotivity/resource/stack -I$(PKG_CONFIG_SYSROOT_DIR)/usr/include/iotivity/resource/ocrandom -I$(PKG_CONFIG_SYSROOT_DIR)/usr/include/iotivity/resource/logger -I$(PKG_CONFIG_SYSROOT_DIR)/usr/include/iotivity/resource/oc_logger
+PKG_CONFIG?=pkg-config
 
-YOCTOLDFLAGS=-loc -loctbstack -loc_logger -lmraa
-YOCTOLDFLAGS+=-pthread
+override CXXFLAGS+=$(shell $(PKG_CONFIG) iotivity --cflags)
+override LDFLAGS+=$(shell $(PKG_CONFIG) iotivity --libs)
+override LDFLAGS+=-lmraa -pthread
+override CXXFLAGS+=-std=c++0x
 
 all: sensorboard
 
 %.o: %.cpp
-ifeq ($(PKG_CONFIG_SYSROOT_DIR),)
-	echo "Error: Yocto cross-toolchain environment not initialized"
-	exit 1 
-endif
-	$(CXX) -std=c++0x -c -o $@ $< $(YOCTOCXXFLAGS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
 sensorboard: server.o observer.o
-	$(CXX) -o $@ $^ $(LDFLAGS) $(YOCTOLDFLAGS)
+	$(CXX) -o $@ $^ $(LDFLAGS) $(LDFLAGS)
 
 clean:
 	rm -rf sensorboard *.o
