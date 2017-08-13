@@ -1,0 +1,48 @@
+From eace0b8280eda68aacbc396b9fe6756298af81b1 Mon Sep 17 00:00:00 2001
+From: Philippe Coval <philippe.coval@osg.samsung.com>
+Date: Thu, 20 Jul 2017 15:22:56 +0200
+Subject: [PATCH 4/4] build: Use pkg-config
+
+Bug: https://jira.iotivity.org/browse/IOT-1111
+Origin: https://github.com/TizenTeam/meta-oic/tree/iotivity-sensorboard/master
+
+Signed-off-by: Philippe Coval <philippe.coval@osg.samsung.com>
+---
+ Makefile | 17 ++++++++---------
+ 1 file changed, 8 insertions(+), 9 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 5d09cc1..ab3d632 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,19 +1,18 @@
+-YOCTOCXXFLAGS=-I$(PKG_CONFIG_SYSROOT_DIR)/usr/include/iotivity/resource/ -I$(PKG_CONFIG_SYSROOT_DIR)/usr/include/iotivity/resource/stack -I$(PKG_CONFIG_SYSROOT_DIR)/usr/include/iotivity/resource/ocrandom -I$(PKG_CONFIG_SYSROOT_DIR)/usr/include/iotivity/resource/logger -I$(PKG_CONFIG_SYSROOT_DIR)/usr/include/iotivity/resource/oc_logger
++PKG_CONFIG?=pkg-config
+ 
+-YOCTOLDFLAGS=-loc -loctbstack -loc_logger -lmraa
+-YOCTOLDFLAGS+=-pthread
++override CXXFLAGS+=$(shell $(PKG_CONFIG) iotivity --cflags)
++override CXXFLAGS+=-std=c++0x
++override LDLIBS+=$(shell $(PKG_CONFIG) iotivity --libs)
++override LDLIBS+=-lmraa
++override LDFLAGS+=-pthread
+ 
+ all: sensorboard
+ 
+ %.o: %.cpp
+-ifeq ($(PKG_CONFIG_SYSROOT_DIR),)
+-	echo "Error: Yocto cross-toolchain environment not initialized"
+-	exit 1 
+-endif
+-	$(CXX) -std=c++0x -c -o $@ $< $(YOCTOCXXFLAGS)
++	$(CXX) $(CXXFLAGS) -c -o $@ $<
+ 
+ sensorboard: server.o observer.o
+-	$(CXX) -o $@ $^ $(LDFLAGS) $(YOCTOLDFLAGS)
++	$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
+ 
+ clean:
+ 	rm -rf sensorboard *.o
+-- 
+1.9.1
+
