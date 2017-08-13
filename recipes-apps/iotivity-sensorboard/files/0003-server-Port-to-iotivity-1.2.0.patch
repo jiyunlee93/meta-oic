@@ -1,0 +1,68 @@
+From dcc5e1fd4204f08126ff940232283347b4963b15 Mon Sep 17 00:00:00 2001
+From: Philippe Coval <philippe.coval@osg.samsung.com>
+Date: Thu, 20 Jul 2017 15:33:36 +0200
+Subject: [PATCH 3/4] server: Port to iotivity-1.2.0+
+
+Bug: https://jira.iotivity.org/browse/IOT-1111
+Change-Id: Ic2503aff51444faee97769c2f2ab999b98959acc
+Origin: https://github.com/TizenTeam/meta-oic/tree/iotivity-sensorboard/master
+Signed-off-by: Philippe Coval <philippe.coval@osg.samsung.com>
+---
+ server.cpp | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/server.cpp b/server.cpp
+index 8308577..5cb3215 100644
+--- a/server.cpp
++++ b/server.cpp
+@@ -107,7 +107,6 @@ void IoTServer::temperatureObserverLoop()
+     usleep(1500000);
+     cout << "Temperature Observer Callback" << endl;
+     shared_ptr<OCResourceResponse> resourceResponse(new OCResourceResponse());
+-    resourceResponse->setErrorCode(200);
+     resourceResponse->setResourceRepresentation(getTemperatureRepresentation(),
+     EDISON_RESOURCE_INTERFACE);
+     OCStackResult result = OCPlatform::notifyListOfObservers(m_temperatureResource,
+@@ -125,7 +124,6 @@ void IoTServer::lightObserverLoop()
+     usleep(1500000);
+     cout << "Light Observer Callback" << endl;
+     shared_ptr<OCResourceResponse> resourceResponse(new OCResourceResponse());
+-    resourceResponse->setErrorCode(200);
+     resourceResponse->setResourceRepresentation(getLightRepresentation(),
+     EDISON_RESOURCE_INTERFACE);
+     OCStackResult result = OCPlatform::notifyListOfObservers(m_ambientLightResource,
+@@ -167,7 +165,6 @@ OCEntityHandlerResult IoTServer::lightEntityHandler(shared_ptr<OCResourceRequest
+                 cout << "GET request for ambient light reading" << endl;
+                 if (Response)
+                 {
+-                    Response->setErrorCode(200);
+                     Response->setResponseResult(OC_EH_OK);
+                     Response->setResourceRepresentation(getLightRepresentation());
+                     if (OCPlatform::sendResponse(Response) == OC_STACK_OK)
+@@ -224,7 +221,6 @@ OCEntityHandlerResult IoTServer::temperatureEntityHandler(shared_ptr<OCResourceR
+                 cout << "GET request for temperature sensor reading" << endl;
+                 if (Response)
+                 {
+-                    Response->setErrorCode(200);
+                     Response->setResponseResult(OC_EH_OK);
+                     Response->setResourceRepresentation(getTemperatureRepresentation());
+                     if (OCPlatform::sendResponse(Response) == OC_STACK_OK)
+@@ -305,7 +301,6 @@ OCEntityHandlerResult IoTServer::LEDEntityHandler(shared_ptr<OCResourceRequest>
+                 putLEDRepresentation();
+                 if (Response)
+                 {
+-                    Response->setErrorCode(200);
+                     Response->setResourceRepresentation(getLEDRepresentation());
+                     Response->setResponseResult(OC_EH_OK);
+                     if (OCPlatform::sendResponse(Response) == OC_STACK_OK)
+@@ -319,7 +314,6 @@ OCEntityHandlerResult IoTServer::LEDEntityHandler(shared_ptr<OCResourceRequest>
+                 cout << "GET request for platform LED" << endl;
+                 if (Response)
+                 {
+-                    Response->setErrorCode(200);
+                     Response->setResourceRepresentation(getLEDRepresentation());
+                     Response->setResponseResult(OC_EH_OK);
+                     if (OCPlatform::sendResponse(Response) == OC_STACK_OK)
+-- 
+1.9.1
+
