@@ -1,4 +1,4 @@
-PR = "r1"
+PR = "r2"
 SUMMARY = "IoTivity framework and SDK sponsored by the Open Connectivity Foundation."
 DESCRIPTION = "IoTivity is an open source software framework enabling seamless device-to-device connectivity to address the emerging needs of the Internet of Things."
 HOMEPAGE = "https://www.iotivity.org/"
@@ -36,6 +36,7 @@ SRC_URI += "${url_mbedtls};name=mbedtls;destsuffix=${S}/extlibs/mbedtls/mbedtls;
 
 inherit pkgconfig scons
 
+TARGET_LDFLAGS_append = " -Wl,-rpath-link=\\$$ORIGIN"
 
 python () {
     IOTIVITY_TARGET_ARCH = d.getVar("TARGET_ARCH", True)
