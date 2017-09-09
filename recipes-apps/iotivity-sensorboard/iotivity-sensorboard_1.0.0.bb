@@ -7,7 +7,10 @@ SECTION = "apps"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://server.cpp;beginline=1;endline=19;md5=a692dd0c72bcfa341a4ba826b37caf15"
 
-SRC_URI = "file://iotivity-sensorboard.tar.gz \
+branch = "iotivity-sensorboard/master"
+SRC_URI = "git:///home/user/mnt/meta-oic;destsuffix=${S};branch=${iotivity};protocol=file"
+SRC_REV = ""
+SRC_URI = "\
         file://0001-Build-Use-LDFLAGS-variable-from-env-and-add-pthread-.patch \
         file://0003-server-Port-to-iotivity-1.2.0.patch \
         file://0004-build-Use-pkg-config.patch \
