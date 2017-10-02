@@ -20,8 +20,8 @@ branch_iotivity ?= "1.3-rel"
 baseurl_iotivity ?= "git://github.com/iotivity/iotivity.git"
 SRCREV_iotivity = "${branch_iotivity}"
 SRCREV = "${SRCREV_iotivity}"
-uri_iotivity ?= "${baseurl_iotivity};destsuffix=${S};branch=${branch_iotivity};protocol=http"
-SRC_URI = "${uri_iotivity}"
+url_iotivity ?= "${baseurl_iotivity};destsuffix=${S};branch=${branch_iotivity};protocol=http"
+SRC_URI = "${url_iotivity}"
 
 url_tinycbor = "git://github.com/01org/tinycbor.git"
 SRCREV_tinycbor = "31c7f81d45d115d2007b1c881cbbd3a19618465c"
@@ -41,21 +41,16 @@ SRCREV_mbedtls = "85c2a928ed352845793db000e78e2b42c8dcf055"
 url_mbedtls="git://github.com/ARMmbed/mbedtls.git"
 SRC_URI += "${url_mbedtls};name=mbedtls;destsuffix=${S}/extlibs/mbedtls/mbedtls;protocol=http"
 
+url_rapidjson = "git://github.com/miloyip/rapidjson.git"
+SRCREV_rapidjson = "3d5848a7cd3367c5cb451c6493165b7745948308"
+SRC_URI += "${url_rapidjson};name=rapidjson;;nobranch=1;destsuffix=${S}/extlibs/rapidjson/rapidjson;protocol=http"
+
 branch_libcoap = "IoTivity-1.2.1d"
 SRCREV_libcoap = "${branch_libcoap}"
 url_libcoap = "git://github.com/dthaler/libcoap.git"
 SRC_URI += "${url_libcoap};name=libcoap;destsuffix=${S}/extlibs/libcoap/libcoap;protocol=http;nobranch=1"
 
-#TODO: check
-url_rapidjson = "https://github.com/miloyip/rapidjson/archive/v1.0.2.zip"
-SRC_URI += "${url_rapidjson};name=rapidjson;subdir=${BP}/extlibs/rapidjson"
-SRC_URI[rapidjson.md5sum] = "446a0673d58766e507d641412988dcaa"
-SRC_URI[rapidjson.sha256sum] = "69e876bd07670189214f44475add2e0afb8374e5798270208488c973a95f501d"
-
 inherit pkgconfig scons
-
-# TODO:
-#TARGET_LDFLAGS_append = " -Wl,-rpath-link=\\$$ORIGIN"
 
 python () {
     IOTIVITY_TARGET_ARCH = d.getVar("TARGET_ARCH", True)
@@ -64,7 +59,7 @@ python () {
     EXTRA_OESCONS += " TARGET_OS=yocto TARGET_ARCH=" + IOTIVITY_TARGET_ARCH + " RELEASE=1"
     EXTRA_OESCONS += " VERBOSE=1"
     # Aligned to default configuration, but features can be changed here (at your own risk):
-    EXTRA_OESCONS += " -j1"
+    # EXTRA_OESCONS += " -j1"
     # EXTRA_OESCONS += " ROUTING=GW"
     # EXTRA_OESCONS += " SECURED=0"
     # EXTRA_OESCONS += " TCP=1"
@@ -120,8 +115,6 @@ do_install_append() {
     #CSDK Shared
     copy_file ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/libconnectivity_abstraction.so ${D}${libdir}
     copy_file ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/liboctbstack.so ${D}${libdir}
-# TODO
-#   copy_file ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/liboctbstack_internal.a ${D}${libdir}
 
     #CSDK Static
     copy_file ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/libconnectivity_abstraction.a ${D}${libdir}
@@ -187,51 +180,21 @@ do_install_append() {
     make_dir ${IOTIVITY_BIN_DIR_D}/tests/resource
     copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/resource/c_common/ocrandom/test/randomtests ${IOTIVITY_BIN_DIR_D}/tests/resource/ocrandom_tests
     copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/resource/unittests/unittests ${IOTIVITY_BIN_DIR_D}/tests/resource/oc_unittests
-# TODO:
-#   copy_file ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/resource/unittests/oic_svr_db_client.dat ${IOTIVITY_BIN_DIR_D}/tests/resource
+    copy_file ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/resource/unittests/oic_svr_db_client.dat ${IOTIVITY_BIN_DIR_D}/tests/resource
     copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/resource/csdk/stack/test/stacktests ${IOTIVITY_BIN_DIR_D}/tests/resource/octbstack_tests
     copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/resource/csdk/connectivity/test/catests ${IOTIVITY_BIN_DIR_D}/tests/resource/ca_tests
     copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/resource/oc_logger/examples/examples_cpp ${IOTIVITY_BIN_DIR_D}/tests/resource/logger_test_cpp
     copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/resource/oc_logger/examples/examples_c ${IOTIVITY_BIN_DIR_D}/tests/resource/logger_test_c
     if ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', 'false', 'true', d)}; then
         copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/resource/csdk/security/unittest/unittest ${IOTIVITY_BIN_DIR_D}/tests/resource/security_tests
+        copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/resource/csdk/security/tool/json2cbor ${IOTIVITY_BIN_DIR_D}/
     fi
-    #Resource headers
-    make_dir ${D}${includedir}
-    copy_file_recursive \
-     ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/include \
-     ${D}${includedir}/iotivity
-    # TODO
-    # make_dir ${D}${includedir}/iotivity/resource/stack/
-    # make_dir ${D}${includedir}/iotivity/resource/logger/
-    # make_dir ${D}${includedir}/iotivity/resource/connectivity/api
-    # make_dir ${D}${includedir}/iotivity/resource/connectivity/external
-    # make_dir ${D}${includedir}/iotivity/resource/connectivity/common
-    # make_dir ${D}${includedir}/iotivity/resource/security/
-    # make_dir ${D}${includedir}/iotivity/resource/ocrandom/
-    # make_dir ${D}${includedir}/iotivity/resource/oc_logger/
-
-    # copy_file_recursive ${S}/resource/include ${D}${includedir}/iotivity/resource
-    # copy_file_recursive ${S}/resource/csdk/stack/include ${D}${includedir}/iotivity/resource/stack
-    # copy_file_recursive ${S}/resource/csdk/logger/include  ${D}${includedir}/iotivity/resource/logger
-    # copy_file_recursive ${S}/resource/csdk/connectivity/inc  ${D}${includedir}/iotivity/resource/connectivity
-    # copy_file_recursive ${S}/resource/csdk/connectivity/api ${D}${includedir}/iotivity/resource/connectivity/api
-    # copy_file_recursive ${S}/resource/csdk/connectivity/common/inc ${D}${includedir}/iotivity/resource/connectivity/common
-    # copy_file_recursive ${S}/resource/csdk/security/include  ${D}${includedir}/iotivity/resource/security
-    # copy_file_recursive ${S}/resource/c_common/ocrandom/include ${D}${includedir}/iotivity/resource/ocrandom
-    # copy_file_recursive ${S}/resource/oc_logger/include ${D}${includedir}/iotivity/resource/oc_logger
-    # copy_file ${S}/resource/c_common/oic_string/include/oic_string.h ${D}${includedir}/iotivity/resource
-    # copy_file ${S}/resource/c_common/oic_malloc/include/oic_malloc.h ${D}${includedir}/iotivity/resource
 
     #ZigBee Plugin
     #Libraries
     copy_file ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/libzigbee_wrapper.a ${D}${libdir}
     copy_file ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/libtelegesis_wrapper.a ${D}${libdir}
     copy_file ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/libplugin_interface.a ${D}${libdir}
-
-    #Headers
-    make_dir ${D}${includedir}/iotivity/plugins
-    copy_file_recursive ${S}/plugins/include ${D}${includedir}/iotivity/plugins
 
     #Samples
     make_dir ${IOTIVITY_BIN_DIR_D}/examples/plugins/zigbee/
@@ -295,9 +258,9 @@ do_install_append() {
     copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/resource-encapsulation/unittests/rcs_client_test ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation
     copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/resource-encapsulation/src/resourceBroker/unittest/broker_test ${IOTIVITY_BIN_DIR_D}/examples/service/resource-encapsulation/resource-broker
     copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/resource-encapsulation/src/resourceCache/unittests/cache_test ${IOTIVITY_BIN_DIR_D}/examples/service/resource-encapsulation/resource-cache
-#TODO:
-#   copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/resource-encapsulation/src/common/rcs_common_test ${IOTIVITY_BIN_DIR_D}/examples/service/resource-encapsulation/common
-#   copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/resource-encapsulation/src/serverBuilder/rcs_server_test ${IOTIVITY_BIN_DIR_D}/examples/service/resource-encapsulation/server-builder
+
+    copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/resource-encapsulation/src/common/primitiveResource/unittests/rcs_common_test ${IOTIVITY_BIN_DIR_D}/examples/service/resource-encapsulation/common
+    copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/resource-encapsulation/src/serverBuilder/rcs_server_test ${IOTIVITY_BIN_DIR_D}/examples/service/resource-encapsulation/server-builder
 
     #Resource directory
     copy_file ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/libresource_directory.a ${D}${libdir}
@@ -315,17 +278,15 @@ do_install_append() {
 
     #Easy setup app
     make_dir ${IOTIVITY_BIN_DIR_D}/examples/service/easy-setup
-#TODO
-#   copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/easy-setup/sampleapp/mediator/linux/enrollee ${IOTIVITY_BIN_DIR_D}/examples/service/easy-setup
+    copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/easy-setup/sampleapp/enrollee/linux/enrollee ${IOTIVITY_BIN_DIR_D}/examples/service/easy-setup
     copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/easy-setup/sampleapp/mediator/linux/richsdk_sample/mediator ${IOTIVITY_BIN_DIR_D}/examples/service/easy-setup
     copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/easy-setup/sampleapp/mediator/linux/richsdk_sample/submediator ${IOTIVITY_BIN_DIR_D}/examples/service/easy-setup
 
-#TODO
     #Easy setup tests
-#    if ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', 'false', 'true', d)}; then
-#        make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/easy-setup
-#        copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/easy-setup/mediator/richsdk/unittests/easysetup_mediator_test ${IOTIVITY_BIN_DIR_D}/tests/service/easy-setup
-#   fi
+    if ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', 'true', 'false', d)}; then
+        make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/easy-setup
+        copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/easy-setup/mediator/richsdk/unittests/easysetup_mediator_test ${IOTIVITY_BIN_DIR_D}/tests/service/easy-setup
+    fi
 
     #Scene manager
     copy_file ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/libscene_manager.a ${D}${libdir}
@@ -344,48 +305,17 @@ do_install_append() {
     copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/scene-manager/unittests/scene_list_test ${IOTIVITY_BIN_DIR_D}/tests/service/scene-manager
     copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/scene-manager/unittests/scene_test ${IOTIVITY_BIN_DIR_D}/tests/service/scene-manager
 
-    #Service Headers
-    make_dir ${D}${includedir}/iotivity/service/resource-container/
-    make_dir ${D}${includedir}/iotivity/service/resource-encapsulation/
-    make_dir ${D}${includedir}/iotivity/service/resource-directory/
-    make_dir ${D}${includedir}/iotivity/service/easy-setup/enrollee/
-    make_dir ${D}${includedir}/iotivity/service/easy-setup/mediator/csdk/
-    make_dir ${D}${includedir}/iotivity/service/easy-setup/mediator/richsdk/
-    make_dir ${D}${includedir}/iotivity/service/scene-manager/
-
-    #Resource container
-    copy_file_recursive ${S}/service/resource-container/include ${D}${includedir}/iotivity/service/resource-container
-
-    #Resource Encapsulation
-    copy_file_recursive ${S}/service/resource-encapsulation/include ${D}${includedir}/iotivity/service/resource-encapsulation
-    copy_file_recursive ${S}/service/resource-encapsulation/src/common/expiryTimer/include ${D}${includedir}/iotivity/service/resource-encapsulation
-    copy_file_recursive ${S}/service/resource-encapsulation/src/common/primitiveResource/include ${D}${includedir}/iotivity/service/resource-encapsulation
-    copy_file_recursive ${S}/service/resource-encapsulation/src/common/utils/include ${D}${includedir}/iotivity/service/resource-encapsulation
-    copy_file_recursive ${S}/service/resource-encapsulation/src/resourceBroker/include ${D}${includedir}/iotivity/service/resource-encapsulation
-    copy_file_recursive ${S}/service/resource-encapsulation/src/resourceCache/include ${D}${includedir}/iotivity/service/resource-encapsulation
-    copy_file_recursive ${S}/service/resource-encapsulation/src/serverBuilder/include ${D}${includedir}/iotivity/service/resource-encapsulation
-
-    #Easy setup
-    copy_file_recursive ${S}/service/easy-setup/inc ${D}${includedir}/iotivity/service/easy-setup
-    copy_file_recursive ${S}/service/easy-setup/mediator/richsdk/inc/ ${D}${includedir}/iotivity/service/easy-setup/mediator/richsdk/
-
-    #Scene manager
-    copy_file_recursive ${S}/service/scene-manager/include ${D}${includedir}/iotivity/service/scene-manager/
-
-    # #Misc headers
-    # make_dir ${D}${includedir}/iotivity/extlibs/cjson
-    # make_dir ${D}${includedir}/iotivity/extlibs/timer
-    # copy_file ${S}/extlibs/cjson/cJSON.h ${D}${includedir}/iotivity/extlibs/cjson
-    # copy_file ${S}/extlibs/timer/timer.h ${D}${includedir}/iotivity/extlibs/timer
-    # copy_file ${S}/resource/c_common/platform_features.h ${D}${includedir}/iotivity/resource
-    # copy_file ${S}/resource/c_common/platform_features.h ${D}${includedir}/iotivity/resource/stack
-    # copy_file ${S}/resource/c_common/iotivity_config.h ${D}${includedir}/iotivity/resource
-
     #Adapt unaligned pkconfig (transitionnal)
     sed -e 's|^prefix=.*|prefix=/usr|g' -i ${S}/iotivity.pc
     make_dir ${D}${libdir}/pkgconfig/
     copy_file ${S}/iotivity.pc ${D}${libdir}/pkgconfig/
-    make_dir ${D}${includedir}/
+    #Installed headers
+    make_dir ${D}${includedir}
+    copy_file_recursive \
+       ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/include \
+       ${D}${includedir}/iotivity
+
+    # TODO: Support legacy path (transitional, use pkg-config)
     ln -s iotivity/resource ${D}${includedir}/resource
     ln -s iotivity/service ${D}${includedir}/service
     ln -s iotivity/c_common ${D}${includedir}/c_common
