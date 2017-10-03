@@ -45,11 +45,6 @@ url_rapidjson = "git://github.com/miloyip/rapidjson.git"
 SRCREV_rapidjson = "3d5848a7cd3367c5cb451c6493165b7745948308"
 SRC_URI += "${url_rapidjson};name=rapidjson;;nobranch=1;destsuffix=${S}/extlibs/rapidjson/rapidjson;protocol=http"
 
-branch_libcoap = "IoTivity-1.2.1d"
-SRCREV_libcoap = "${branch_libcoap}"
-url_libcoap = "git://github.com/dthaler/libcoap.git"
-SRC_URI += "${url_libcoap};name=libcoap;destsuffix=${S}/extlibs/libcoap/libcoap;protocol=http;nobranch=1"
-
 inherit pkgconfig scons
 
 python () {
@@ -288,6 +283,22 @@ do_install_append() {
         copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/easy-setup/mediator/richsdk/unittests/easysetup_mediator_test ${IOTIVITY_BIN_DIR_D}/tests/service/easy-setup
     fi
 
+    #Notification
+    copy_file ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/libnotification_consumer.so ${D}${libdir}
+    copy_file ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/libnotification_provider.so ${D}${libdir}
+
+    #Notification app
+    make_dir ${IOTIVITY_BIN_DIR_D}/examples/service/notification
+    copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/notification/examples/linux/notificationconsumer ${IOTIVITY_BIN_DIR_D}/examples/service/notification
+    copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/notification/examples/linux/notificationprovider ${IOTIVITY_BIN_DIR_D}/examples/service/notification
+
+    #Notification tests
+    if ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=1', 'false', 'true', d)}; then
+        make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/notification
+        copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/notification/unittest/notification_consumer_test ${IOTIVITY_BIN_DIR_D}/tests/service/notification
+        copy_exec ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/service/notification/unittest/notification_provider_test ${IOTIVITY_BIN_DIR_D}/tests/service/notification
+    fi
+
     #Scene manager
     copy_file ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/libscene_manager.a ${D}${libdir}
 
@@ -314,8 +325,6 @@ do_install_append() {
     copy_file_recursive \
        ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/include \
        ${D}${includedir}/iotivity
-
-    # TODO: Support legacy path (transitional, use pkg-config)
     ln -s iotivity/resource ${D}${includedir}/resource
     ln -s iotivity/service ${D}${includedir}/service
     ln -s iotivity/c_common ${D}${includedir}/c_common
@@ -407,6 +416,8 @@ FILES_${PN}-service = "\
         ${libdir}/libHueBundle.so \
         ${libdir}/libESEnrolleeSDK.so \
         ${libdir}/libESMediatorRich.so \
+        ${libdir}/libnotification_consumer.so \
+        ${libdir}/libnotification_provider.so \
         ${libdir}/librcs_client.so \
         ${libdir}/libTestBundle.so"
 
@@ -423,6 +434,7 @@ FILES_${PN}-service-samples-dbg = "\
         ${IOTIVITY_BIN_DIR}/examples/service/resource-container/.debug \
         ${IOTIVITY_BIN_DIR}/examples/service/resource-directory/.debug \
         ${IOTIVITY_BIN_DIR}/examples/service/easy-setup/.debug \
+        ${IOTIVITY_BIN_DIR}/examples/service/notification/.debug \
         ${IOTIVITY_BIN_DIR}/examples/service/scene-manager/.debug"
 
 FILES_${PN}-service-samples = "\
@@ -432,6 +444,7 @@ FILES_${PN}-tests-dbg = "\
         ${libdir}/.debug/libgtest.so \
         ${libdir}/.debug/libgtest_main.so \
         ${IOTIVITY_BIN_DIR}/tests/service/easy-setup/.debug \
+        ${IOTIVITY_BIN_DIR}/tests/service/notification/.debug \
         ${IOTIVITY_BIN_DIR}/tests/resource/.debug \
         ${IOTIVITY_BIN_DIR}/tests/service/resource-container/.debug \
         ${IOTIVITY_BIN_DIR}/tests/service/resource-encapsulation/.debug \
