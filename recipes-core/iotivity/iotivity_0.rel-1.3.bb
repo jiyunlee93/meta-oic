@@ -1,9 +1,9 @@
 # TODO:
 # echo 'PREFERRED_VERSION_iotivity="0.rel-1.3"' >> build/conf/local.conf
 
-#SRCREV  = "${AUTOREV}"
+#SRCREV = "${AUTOREV}"
 #PV = "0+git${SRCPV}"
-#S  = "${WORKDIR}/git"
+#S = "${WORKDIR}/git"
 
 SUMMARY = "IoTivity framework and SDK sponsored by the Open Connectivity Foundation."
 DESCRIPTION = "IoTivity is an open source software framework enabling seamless device-to-device connectivity to address the emerging needs of the Internet of Things."
@@ -18,7 +18,7 @@ LIC_FILES_CHKSUM = "file://LICENSE.md;md5=22bf216f3077c279aed7b36b1fa9e6d1"
 
 branch_iotivity ?= "1.3-rel"
 baseurl_iotivity ?= "git://github.com/iotivity/iotivity.git"
-SRCREV_iotivity = "${branch_iotivity}"
+SRCREV_iotivity ?= "${branch_iotivity}"
 SRCREV = "${SRCREV_iotivity}"
 url_iotivity ?= "${baseurl_iotivity};destsuffix=${S};branch=${branch_iotivity};protocol=http"
 SRC_URI = "${url_iotivity}"
