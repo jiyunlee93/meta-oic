@@ -1,7 +1,7 @@
 # TODO:
 # echo 'PREFERRED_VERSION_iotivity="0.0.0"' >> build/conf/local.conf
 
-#PR ?= "r2"
+PR ?= "r1"
 #SRCREV  = "${AUTOREV}"
 #PV = "0+git${SRCPV}"
 #S  = "${WORKDIR}/git"
@@ -42,10 +42,10 @@ SRCREV_mbedtls = "85c2a928ed352845793db000e78e2b42c8dcf055"
 url_mbedtls="git://github.com/ARMmbed/mbedtls.git"
 SRC_URI += "${url_mbedtls};name=mbedtls;destsuffix=${S}/extlibs/mbedtls/mbedtls;protocol=http"
 
-#TODO
-url_rapidjson = "git://github.com/miloyip/rapidjson.git"
+#TODO https://github.com/miloyip/rapidjson/archive/v1.0.2.zip
+url_rapidjson = "git://github.com/Tencent/rapidjson.git"
 SRCREV_rapidjson = "3d5848a7cd3367c5cb451c6493165b7745948308"
-SRC_URI += "${url_rapidjson};name=rapidjson;;nobranch=1;destsuffix=${S}/extlibs/rapidjson/rapidjson;protocol=http"
+SRC_URI += "${url_rapidjson};name=rapidjson;destsuffix=${S}/extlibs/rapidjson/rapidjson;protocol=http"
 
 branch_libcoap = "IoTivity-1.2.1d"
 SRCREV_libcoap = "${branch_libcoap}"
@@ -65,6 +65,7 @@ python () {
     IOTIVITY_TARGET_ARCH = d.getVar("TARGET_ARCH", True)
     d.setVar("IOTIVITY_TARGET_ARCH", IOTIVITY_TARGET_ARCH)
     EXTRA_OESCONS = d.getVar("EXTRA_OESCONS", True)
+    EXTRA_OESCONS += " --prefix=${prefix}"
     EXTRA_OESCONS += " TARGET_OS=yocto TARGET_ARCH=" + IOTIVITY_TARGET_ARCH + " RELEASE=1"
     EXTRA_OESCONS += " VERBOSE=1"
  #  EXTRA_OESCONS += " --install-sandbox=${D}"
@@ -77,7 +78,7 @@ python () {
 }
 
 
-IOTIVITY_BIN_DIR = "/opt/${PN}"
+IOTIVITY_BIN_DIR = "${libdir}/${PN}"
 IOTIVITY_BIN_DIR_D = "${D}${IOTIVITY_BIN_DIR}"
 
 do_compile_prepend() {
@@ -107,62 +108,14 @@ copy_exec_recursive() {
     cd $1 && find . -executable -exec install -c -m 555 "{}" $2/"{}" \;
 }
 
-do_install_() {
 #TODO: fix https://git.yoctoproject.org/cgit.cgi/poky/plain/meta/classes/scons.bbclass
-    ${STAGING_BINDIR_NATIVE}/scons --prefix=${prefix} --install-sandbox=${D} install ${EXTRA_OESCONS}
+scon_do_install() {
+    ${STAGING_BINDIR_NATIVE}/scons --install-sandbox=${D} install ${EXTRA_OESCONS}
+}
 
+do_install() {
+scon_do_install
     cd ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/
-    #Resource C++ Apps
-    make_dir ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    find resource/examples/ \
-      -iname "*.dat"\
-      -exec install -c -m 444 "{}"  ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp/ \;
-
-    copy_exec examples/OICMiddle/OICMiddle ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/devicediscoveryclient ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/devicediscoveryserver ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/fridgeclient ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/fridgeserver ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/garageclient ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/garageserver ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/groupclient ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/groupserver ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/lightserver ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/presenceclient ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/presenceserver ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/roomclient ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/roomserver ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/simpleclient ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/simpleclientHQ ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/simpleclientserver ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/simpleserver ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/simpleserverHQ ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-    copy_exec resource/examples/threadingsample ${IOTIVITY_BIN_DIR_D}/examples/resource/cpp
-
-    #Resource CSDK Apps
-    make_dir ${IOTIVITY_BIN_DIR_D}/examples/resource/c/SimpleClientServer
-    copy_exec resource/csdk/stack/samples/linux/SimpleClientServer/occlientcoll ${IOTIVITY_BIN_DIR_D}/examples/resource/c/SimpleClientServer
-    if ${@bb.utils.contains('EXTRA_OESCONS', 'ROUTING=GW', 'true', 'false', d)}; then
-        copy_exec resource/csdk/stack/samples/linux/SimpleClientServer/ocrouting ${IOTIVITY_BIN_DIR_D}/examples/resource/c/SimpleClientServer
-    fi
-    copy_exec resource/csdk/stack/samples/linux/SimpleClientServer/ocserver ${IOTIVITY_BIN_DIR_D}/examples/resource/c/SimpleClientServer
-    copy_exec resource/csdk/stack/samples/linux/SimpleClientServer/ocserverbasicops ${IOTIVITY_BIN_DIR_D}/examples/resource/c/SimpleClientServer
-    copy_exec resource/csdk/stack/samples/linux/SimpleClientServer/occlientslow ${IOTIVITY_BIN_DIR_D}/examples/resource/c/SimpleClientServer
-    copy_exec resource/csdk/stack/samples/linux/SimpleClientServer/ocserverslow ${IOTIVITY_BIN_DIR_D}/examples/resource/c/SimpleClientServer
-    copy_exec resource/csdk/stack/samples/linux/SimpleClientServer/occlientbasicops ${IOTIVITY_BIN_DIR_D}/examples/resource/c/SimpleClientServer
-    copy_exec resource/csdk/stack/samples/linux/SimpleClientServer/ocservercoll ${IOTIVITY_BIN_DIR_D}/examples/resource/c/SimpleClientServer
-    copy_exec resource/csdk/stack/samples/linux/SimpleClientServer/occlient ${IOTIVITY_BIN_DIR_D}/examples/resource/c/SimpleClientServer
-
-    if ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', 'false', 'true', d)}; then
-        make_dir ${IOTIVITY_BIN_DIR_D}/examples/resource/c/secure
-        copy_exec resource/csdk/stack/samples/linux/secure/ocamsservice ${IOTIVITY_BIN_DIR_D}/examples/resource/c/secure
-        copy_exec resource/csdk/stack/samples/linux/secure/ocserverbasicops ${IOTIVITY_BIN_DIR_D}/examples/resource/c/secure
-        copy_exec resource/csdk/stack/samples/linux/secure/occlientbasicops ${IOTIVITY_BIN_DIR_D}/examples/resource/c/secure
-
-        find resource/csdk/stack/samples/linux \
-          -iname "*.dat"\
-          -exec install -c -m 444 {} ${IOTIVITY_BIN_DIR_D}/examples/resource/c/secure/ \;
-    fi
 
     #Resource Tests
     make_dir ${IOTIVITY_BIN_DIR_D}/tests/resource
@@ -171,31 +124,16 @@ do_install_() {
 #   copy_file resource/unittests/oic_svr_db_client.dat ${IOTIVITY_BIN_DIR_D}/tests/resource
     copy_exec resource/csdk/stack/test/stacktests ${IOTIVITY_BIN_DIR_D}/tests/resource/octbstack_tests
     copy_exec resource/csdk/connectivity/test/catests ${IOTIVITY_BIN_DIR_D}/tests/resource/ca_tests
-    copy_exec resource/oc_logger/examples/examples_cpp ${IOTIVITY_BIN_DIR_D}/tests/resource/logger_test_cpp
-    copy_exec resource/oc_logger/examples/examples_c ${IOTIVITY_BIN_DIR_D}/tests/resource/logger_test_c
+#   copy_exec resource/oc_logger/examples/examples_cpp ${IOTIVITY_BIN_DIR_D}/tests/resource/logger_test_cpp
+#   copy_exec resource/oc_logger/examples/examples_c ${IOTIVITY_BIN_DIR_D}/tests/resource/logger_test_c
     if ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', 'false', 'true', d)}; then
         copy_exec resource/csdk/security/unittest/unittest ${IOTIVITY_BIN_DIR_D}/tests/resource/security_tests
         copy_exec resource/csdk/security/tool/json2cbor ${IOTIVITY_BIN_DIR_D}/
     fi
 
-    #Samples
-    make_dir ${IOTIVITY_BIN_DIR_D}/examples/plugins/zigbee/
-    copy_exec plugins/samples/linux/iotivityandzigbeeserver ${IOTIVITY_BIN_DIR_D}/examples/plugins/zigbee
-    copy_exec plugins/samples/linux/iotivityandzigbeeclient ${IOTIVITY_BIN_DIR_D}/examples/plugins/zigbee
-
     #Tests
     make_dir ${IOTIVITY_BIN_DIR_D}/tests/plugins/zigbee/
     copy_exec plugins/unittests/piunittests ${IOTIVITY_BIN_DIR_D}/tests/plugins/zigbee
-
-    #Resource container sample apps
-    make_dir ${IOTIVITY_BIN_DIR_D}/examples/service/resource-container/
-    copy_exec service/resource-container/HeightSensorApp ${IOTIVITY_BIN_DIR_D}/examples/service/resource-container/
-    copy_exec service/resource-container/THSensorApp ${IOTIVITY_BIN_DIR_D}/examples/service/resource-container/
-    copy_exec service/resource-container/THSensorApp1 ${IOTIVITY_BIN_DIR_D}/examples/service/resource-container/
-    copy_exec service/resource-container/WeightSensorApp ${IOTIVITY_BIN_DIR_D}/examples/service/resource-container/
-    copy_exec service/resource-container/ContainerSample ${IOTIVITY_BIN_DIR_D}/examples/service/resource-container/
-    copy_exec service/resource-container/ContainerSampleClient ${IOTIVITY_BIN_DIR_D}/examples/service/resource-container/
-    copy_file service/resource-container/examples/ResourceContainerConfig.xml ${IOTIVITY_BIN_DIR_D}/examples/service/resource-container/
 
     #Resource container tests
     make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/resource-container
@@ -205,36 +143,17 @@ do_install_() {
     copy_file service/resource-container/unittests/ResourceContainerTestConfig.xml ${IOTIVITY_BIN_DIR_D}/tests/service/resource-container
     copy_file service/resource-container/unittests/libTestBundle.so ${D}${libdir}
 
-    #Resource encapsulation sample apps
-    make_dir ${IOTIVITY_BIN_DIR_D}/examples/service/resource-encapsulation
-    copy_exec service/resource-encapsulation/examples/linux/sampleResourceClient ${IOTIVITY_BIN_DIR_D}/examples/service/resource-encapsulation
-    copy_exec service/resource-encapsulation/examples/linux/sampleResourceServer ${IOTIVITY_BIN_DIR_D}/examples/service/resource-encapsulation
-    copy_exec service/resource-encapsulation/examples/linux/nestedAttributesClient ${IOTIVITY_BIN_DIR_D}/examples/service/resource-encapsulation
-    copy_exec service/resource-encapsulation/examples/linux/nestedAttributesServer ${IOTIVITY_BIN_DIR_D}/examples/service/resource-encapsulation
-
     #Resource encapsulation test
     make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation/resource-broker
     make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation/resource-cache
     make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation/common
     make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation/server-builder
     copy_exec service/resource-encapsulation/unittests/rcs_client_test ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation
-    copy_exec service/resource-encapsulation/src/resourceBroker/unittest/broker_test ${IOTIVITY_BIN_DIR_D}/examples/service/resource-encapsulation/resource-broker
-    copy_exec service/resource-encapsulation/src/resourceCache/unittests/cache_test ${IOTIVITY_BIN_DIR_D}/examples/service/resource-encapsulation/resource-cache
+    copy_exec service/resource-encapsulation/src/resourceBroker/unittest/broker_test ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation/resource-broker
+    copy_exec service/resource-encapsulation/src/resourceCache/unittests/cache_test ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation/resource-cache
 #TODO
-    copy_exec service/resource-encapsulation/src/common/primitiveResource/unittests/rcs_common_test ${IOTIVITY_BIN_DIR_D}/examples/service/resource-encapsulation/common
-    copy_exec service/resource-encapsulation/src/serverBuilder/rcs_server_test ${IOTIVITY_BIN_DIR_D}/examples/service/resource-encapsulation/server-builder
-
-    #Resource directory samples
-    if ${@bb.utils.contains('EXTRA_OESCONS', 'RD_MODE=CLIENT,SERVER', 'true', 'false', d)}; then
-        make_dir ${IOTIVITY_BIN_DIR_D}/examples/service/resource-directory
-        copy_exec_recursive service/resource-directory/samples ${IOTIVITY_BIN_DIR_D}/examples/service/resource-directory
-    fi
-
-    #Easy setup app
-    make_dir ${IOTIVITY_BIN_DIR_D}/examples/service/easy-setup
-    copy_exec service/easy-setup/sampleapp/enrollee/linux/enrollee ${IOTIVITY_BIN_DIR_D}/examples/service/easy-setup
-    copy_exec service/easy-setup/sampleapp/mediator/linux/richsdk_sample/mediator ${IOTIVITY_BIN_DIR_D}/examples/service/easy-setup
-    copy_exec service/easy-setup/sampleapp/mediator/linux/richsdk_sample/submediator ${IOTIVITY_BIN_DIR_D}/examples/service/easy-setup
+    copy_exec service/resource-encapsulation/src/common/primitiveResource/unittests/rcs_common_test ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation/common
+    copy_exec service/resource-encapsulation/src/serverBuilder/rcs_server_test ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation/server-builder
 
     #Easy setup tests
     if ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', 'true', 'false', d)}; then
@@ -242,24 +161,12 @@ do_install_() {
         copy_exec service/easy-setup/mediator/richsdk/unittests/easysetup_mediator_test ${IOTIVITY_BIN_DIR_D}/tests/service/easy-setup
     fi
 
-    #Notification app
-    make_dir ${IOTIVITY_BIN_DIR_D}/examples/service/notification
-    copy_exec service/notification/examples/linux/notificationconsumer ${IOTIVITY_BIN_DIR_D}/examples/service/notification
-    copy_exec service/notification/examples/linux/notificationprovider ${IOTIVITY_BIN_DIR_D}/examples/service/notification
-
     #Notification tests
     if ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=1', 'false', 'true', d)}; then
         make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/notification
         copy_exec service/notification/unittest/notification_consumer_test ${IOTIVITY_BIN_DIR_D}/tests/service/notification
         copy_exec service/notification/unittest/notification_provider_test ${IOTIVITY_BIN_DIR_D}/tests/service/notification
     fi
-
-    #Scene manager apps
-    make_dir ${IOTIVITY_BIN_DIR_D}/examples/service/scene-manager
-    copy_exec service/scene-manager/sampleapp/linux/fanserver ${IOTIVITY_BIN_DIR_D}/examples/service/scene-manager
-    copy_exec service/scene-manager/sampleapp/linux/lightserver ${IOTIVITY_BIN_DIR_D}/examples/service/scene-manager
-    copy_exec service/scene-manager/sampleapp/linux/sceneclient ${IOTIVITY_BIN_DIR_D}/examples/service/scene-manager
-    copy_exec service/scene-manager/sampleapp/linux/sceneserver ${IOTIVITY_BIN_DIR_D}/examples/service/scene-manager
 
     #Scene manager tests
     make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/scene-manager
@@ -301,7 +208,9 @@ do_install_() {
   #     ${D}${includedir}/iotivity
 
     # TODO: Support legacy path (transitional, use pkg-config)
-    ln -s iotivity/{resource,service,c_common}  ${D}${includedir}/
+    ln -s iotivity/resource  ${D}${includedir}/
+    ln -s iotivity/service  ${D}${includedir}/
+    ln -s iotivity/c_common  ${D}${includedir}/
 
     find "${D}" -type f -perm /u+x -exec chrpath -d "{}" \;
     find "${D}" -type f -iname "lib*.so" -exec chrpath -d "{}" \;
@@ -340,7 +249,6 @@ FILES_${PN}-plugins-staticdev = "\
 FILES_${PN}-plugins-dbg = "\
         ${prefix}/src/debug/${PN}/${EXTENDPE}${PV}-${PR}/${PN}-${PV}/plugins \
         ${prefix}/src/debug/${PN}/${EXTENDPE}${PV}-${PR}/${PN}-${PV}/bridging"
-#TODO
 
 FILES_${PN}-resource = "\
         ${libdir}/libconnectivity_abstraction.so \
@@ -365,18 +273,14 @@ FILES_${PN}-resource-dbg = "\
         ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', '', '${libdir}/.debug/libocpmapi.so', d)}"
 
 FILES_${PN}-resource-samples-dbg = "\
-        ${IOTIVITY_BIN_DIR}/examples/resource/cpp/.debug \
-        ${IOTIVITY_BIN_DIR}/examples/resource/c/SimpleClientServer/.debug \
-        ${IOTIVITY_BIN_DIR}/examples/resource/c/secure/.debug"
+        ${IOTIVITY_BIN_DIR}/resource/**/.debug"
 
 FILES_${PN}-resource-samples = "\
-        ${IOTIVITY_BIN_DIR}/examples/resource"
+        ${IOTIVITY_BIN_DIR}/resource/**"
 
 FILES_${PN}-plugins-samples = "\
-        ${IOTIVITY_BIN_DIR}/examples/plugins"
+        ${IOTIVITY_BIN_DIR}/plugins/**"
 
-FILES_${PN}-plugins-samples-dbg = "\
-        ${IOTIVITY_BIN_DIR}/examples/plugins/zigbee/.debug"
 
 FILES_${PN}-service-dbg = "\
         ${prefix}/src/debug/${PN}/${EXTENDPE}${PV}-${PR}/${PN}-${PV}/service \
@@ -409,15 +313,10 @@ FILES_${PN}-service-staticdev = "\
         ${libdir}/libscene_manager.a"
 
 FILES_${PN}-service-samples-dbg = "\
-        ${IOTIVITY_BIN_DIR}/examples/service/resource-encapsulation/.debug \
-        ${IOTIVITY_BIN_DIR}/examples/service/resource-container/.debug \
-        ${IOTIVITY_BIN_DIR}/examples/service/resource-directory/.debug \
-        ${IOTIVITY_BIN_DIR}/examples/service/easy-setup/.debug \
-        ${IOTIVITY_BIN_DIR}/examples/service/notification/.debug \
-        ${IOTIVITY_BIN_DIR}/examples/service/scene-manager/.debug"
+        ${IOTIVITY_BIN_DIR}/service/**.debug"
 
 FILES_${PN}-service-samples = "\
-        ${IOTIVITY_BIN_DIR}/examples/service"
+        ${IOTIVITY_BIN_DIR}/service/**"
 
 FILES_${PN}-tests-dbg = "\
         ${libdir}/.debug/libgtest.so \
