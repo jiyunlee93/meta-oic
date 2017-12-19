@@ -82,7 +82,7 @@ rule/exec/%: ${build_dir} ${conf_file} ${bblayers_file}
 rule/env-exec/%: ${init_build_env}
 	cd ${<D}  \
  && ${source} ${<} ${build_dir} \
- && make -C ${CURDIR} rule/exec/${@F} ARGS="${ARGS}"
+ && ${make} -C ${CURDIR} rule/exec/${@F} ARGS="${ARGS}"
 
 rule/env-shell: ${init_build_env}
 	cd ${<D}  \

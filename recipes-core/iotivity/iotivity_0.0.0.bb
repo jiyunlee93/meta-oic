@@ -108,9 +108,10 @@ copy_exec_recursive() {
     cd $1 && find . -executable -exec install -c -m 555 "{}" $2/"{}" \;
 }
 
-#TODO: fix https://git.yoctoproject.org/cgit.cgi/poky/plain/meta/classes/scons.bbclass
+
 scon_do_install() {
-    ${STAGING_BINDIR_NATIVE}/scons --install-sandbox=${D} install ${EXTRA_OESCONS}
+    echo "TODO: fix https://git.yoctoproject.org/cgit.cgi/poky/plain/meta/classes/scons.bbclass"
+    ${STAGING_BINDIR_NATIVE}/scons --install-sandbox=${D} ${EXTRA_OESCONS} install
 }
 
 do_install() {
@@ -128,7 +129,6 @@ scon_do_install
 #   copy_exec resource/oc_logger/examples/examples_c ${IOTIVITY_BIN_DIR_D}/tests/resource/logger_test_c
     if ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', 'false', 'true', d)}; then
         copy_exec resource/csdk/security/unittest/unittest ${IOTIVITY_BIN_DIR_D}/tests/resource/security_tests
-        copy_exec resource/csdk/security/tool/json2cbor ${IOTIVITY_BIN_DIR_D}/
     fi
 
     #Tests
@@ -208,9 +208,9 @@ scon_do_install
   #     ${D}${includedir}/iotivity
 
     # TODO: Support legacy path (transitional, use pkg-config)
-    ln -s iotivity/resource  ${D}${includedir}/
-    ln -s iotivity/service  ${D}${includedir}/
-    ln -s iotivity/c_common  ${D}${includedir}/
+    ln -s iotivity/resource ${D}${includedir}/
+    ln -s iotivity/service ${D}${includedir}/
+    ln -s iotivity/c_common ${D}${includedir}/
 
     find "${D}" -type f -perm /u+x -exec chrpath -d "{}" \;
     find "${D}" -type f -iname "lib*.so" -exec chrpath -d "{}" \;
@@ -226,6 +226,10 @@ scon_do_install
 #Tests: iotivity-tests, iotivity-tests-dbg
 #Misc: iotivity-tools
 
+FILES_${PN}-tools = "\
+        ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', '', '${libdir}/${PN}/resource/csdk/security/tool/json2cbor', d)}"
+
+
 FILES_${PN}-resource-dev = "\
         ${includedir}/iotivity/resource \
         ${includedir}/iotivity/extlibs \
@@ -233,12 +237,14 @@ FILES_${PN}-resource-dev = "\
 
 FILES_${PN}-resource-thin-staticdev = "\
         ${libdir}/libocsrm.a \
-        ${libdir}/libconnectivity_abstraction.a \
-        ${libdir}/liboctbstack.a \
+        ${libdir}/libconnectivity_abstraction*.a \
+        ${libdir}/liboctbstack*.a \
         ${libdir}/libcoap.a \
         ${libdir}/libc_common.a \
+        ${libdir}/libipca*.a \
         ${libdir}/libroutingmanager.a \
-        ${libdir}/libtimer.a"
+        ${libdir}/libtimer.a \
+        ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', '', '${libdir}/libocpmapi.a', d)}"
 
 FILES_${PN}-plugins-staticdev = "\
         ${includedir}/iotivity/plugins \
@@ -273,10 +279,12 @@ FILES_${PN}-resource-dbg = "\
         ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', '', '${libdir}/.debug/libocpmapi.so', d)}"
 
 FILES_${PN}-resource-samples-dbg = "\
-        ${IOTIVITY_BIN_DIR}/resource/**/.debug"
+        ${IOTIVITY_BIN_DIR}/resource/**/.debug\
+        ${IOTIVITY_BIN_DIR}/examples/**/.debug"
 
 FILES_${PN}-resource-samples = "\
-        ${IOTIVITY_BIN_DIR}/resource/**"
+        ${IOTIVITY_BIN_DIR}/resource/**\
+        ${IOTIVITY_BIN_DIR}/examples/**"
 
 FILES_${PN}-plugins-samples = "\
         ${IOTIVITY_BIN_DIR}/plugins/**"
@@ -302,7 +310,8 @@ FILES_${PN}-service = "\
         ${libdir}/librcs_client.so \
         ${libdir}/librcs_common.so \
         ${libdir}/librcs_container.so \
-        ${libdir}/librcs_server.so"
+        ${libdir}/librcs_server.so \
+        ${libdir}/lib*.so "
 
 FILES_${PN}-service-staticdev = "\
         ${libdir}/librcs_client.a \
@@ -310,7 +319,8 @@ FILES_${PN}-service-staticdev = "\
         ${libdir}/librcs_common.a \
         ${libdir}/librcs_container.a \
         ${libdir}/libresource_directory.a \
-        ${libdir}/libscene_manager.a"
+        ${libdir}/libscene_manager.a\
+        ${libdir}/lib*.a "
 
 FILES_${PN}-service-samples-dbg = "\
         ${IOTIVITY_BIN_DIR}/service/**.debug"
@@ -333,13 +343,10 @@ FILES_${PN}-tests = "\
         ${IOTIVITY_BIN_DIR}/tests \
         ${libdir}/liboctbstack_test.so"
 
-FILES_${PN}-tools = "\
-        ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', '', '${IOTIVITY_BIN_DIR}/json2cbor', d)}"
-
 PACKAGES = "${PN}-tests-dbg ${PN}-tests ${PN}-plugins-dbg ${PN}-plugins-staticdev ${PN}-plugins-samples-dbg ${PN}-plugins-samples ${PN}-resource-dbg ${PN}-resource ${PN}-resource-dev ${PN}-resource-thin-staticdev ${PN}-resource-samples-dbg ${PN}-resource-samples ${PN}-service-dbg ${PN}-service ${PN}-service-dev ${PN}-service-staticdev ${PN}-service-samples-dbg ${PN}-service-samples ${PN}-dev ${PN} ${PN}-tools"
 ALLOW_EMPTY_${PN} = "1"
 RDEPENDS_${PN} += "boost"
-RRECOMMENDS_${PN} += "${PN}-resource ${PN}-service"
+RRECOMMENDS_${PN} += " ${PN}-service"
 RRECOMMENDS_${PN}-dev += "${PN}-resource-dev ${PN}-resource-thin-staticdev ${PN}-plugins-staticdev ${PN}-service-dev ${PN}-service-staticdev"
 RDEPENDS_${PN}-resource += "glib-2.0"
 RRECOMMENDS_${PN}-plugins-staticdev += "${PN}-resource-dev ${PN}-resource-thin-staticdev ${PN}-resource"
@@ -350,4 +357,5 @@ RDEPENDS_${PN}-resource-samples += "${PN}-resource glib-2.0"
 RDEPENDS_${PN}-tests += "${PN}-resource ${PN}-service glib-2.0"
 RDEPENDS_${PN}-service-samples += "${PN}-service ${PN}-resource glib-2.0"
 RDEPENDS_${PN}-service += "${PN}-resource glib-2.0"
+RDEPENDS_${PN}-tools += "${PN}-resource"
 BBCLASSEXTEND = "native nativesdk"

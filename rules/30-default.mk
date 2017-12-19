@@ -4,6 +4,7 @@
 
 # better force in your rule/10-config.mk
 SHELL?=/bin/bash
+make?=nice ionice make
 
 project_name?=meta-yocto-demos
 remote?=tizenteam
