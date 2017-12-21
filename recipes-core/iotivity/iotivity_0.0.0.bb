@@ -43,20 +43,20 @@ url_mbedtls="git://github.com/ARMmbed/mbedtls.git"
 SRC_URI += "${url_mbedtls};name=mbedtls;destsuffix=${S}/extlibs/mbedtls/mbedtls;protocol=http"
 
 #TODO https://github.com/miloyip/rapidjson/archive/v1.0.2.zip
-url_rapidjson = "git://github.com/Tencent/rapidjson.git"
+url_rapidjson = "git://github.com/miloyip/rapidjson.git"
 SRCREV_rapidjson = "3d5848a7cd3367c5cb451c6493165b7745948308"
-SRC_URI += "${url_rapidjson};name=rapidjson;destsuffix=${S}/extlibs/rapidjson/rapidjson;protocol=http"
-
+#SRCREV_rapidjson = "v1.0.2""
+SRC_URI += "${url_rapidjson};name=rapidjson;destsuffix=${S}/extlibs/rapidjson/rapidjson;protocol=http;nobranch=1"
 branch_libcoap = "IoTivity-1.2.1d"
 SRCREV_libcoap = "${branch_libcoap}"
 url_libcoap = "git://github.com/dthaler/libcoap.git"
 SRC_URI += "${url_libcoap};name=libcoap;destsuffix=${S}/extlibs/libcoap/libcoap;protocol=http;nobranch=1"
 
 #TODO: check
-url_rapidjson = "https://github.com/miloyip/rapidjson/archive/v1.0.2.zip"
-SRC_URI += "${url_rapidjson};name=rapidjson;subdir=${BP}/extlibs/rapidjson"
-SRC_URI[rapidjson.md5sum] = "446a0673d58766e507d641412988dcaa"
-SRC_URI[rapidjson.sha256sum] = "69e876bd07670189214f44475add2e0afb8374e5798270208488c973a95f501d"
+#url_rapidjson = "https://github.com/miloyip/rapidjson/archive/v1.0.2.zip"
+#SRC_URI += "${url_rapidjson};name=rapidjson;subdir=${BP}/extlibs/rapidjson"
+#SRC_URI[rapidjson.md5sum] = "446a0673d58766e507d641412988dcaa"
+#SRC_URI[rapidjson.sha256sum] = "69e876bd07670189214f44475add2e0afb8374e5798270208488c973a95f501d"
 
 inherit pkgconfig scons
 
@@ -70,7 +70,7 @@ python () {
     EXTRA_OESCONS += " VERBOSE=1"
  #  EXTRA_OESCONS += " --install-sandbox=${D}"
     # Aligned to default configuration, but features can be changed here (at your own risk):
-    # EXTRA_OESCONS += " -j1"
+    EXTRA_OESCONS += " -j1"
     # EXTRA_OESCONS += " ROUTING=GW"
     # EXTRA_OESCONS += " SECURED=0"
     # EXTRA_OESCONS += " TCP=1"
