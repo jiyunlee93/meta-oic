@@ -54,7 +54,7 @@ python () {
     EXTRA_OESCONS += " TARGET_OS=yocto TARGET_ARCH=" + IOTIVITY_TARGET_ARCH + " RELEASE=1"
     EXTRA_OESCONS += " VERBOSE=1"
     # Aligned to default configuration, but features can be changed here (at your own risk):
-    # EXTRA_OESCONS += " -j1"
+    EXTRA_OESCONS += " ERROR_ON_WARN=False"
     # EXTRA_OESCONS += " ROUTING=GW"
     # EXTRA_OESCONS += " SECURED=0"
     # EXTRA_OESCONS += " TCP=1"
