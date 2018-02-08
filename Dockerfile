@@ -83,12 +83,10 @@ USER nobody
 WORKDIR /usr/local/src/${project}/poky/
 RUN echo "#log: ${project}: Preparing sources (step: ${project})" \
   && set -x \
-  && printf "RELATIVE_DIR := \"\${@os.path.abspath(os.path.dirname(d.getVar('FILE', True)) + '/../../..')}\"\n" \
-  | tee -a ./build/conf/bblayers.conf \
-  && printf "BBLAYERS += \"\${RELATIVE_DIR}/${project}\"\n" \
-  | tee -a ./build/conf/bblayers.conf \
+  && . ./oe-init-build-env \
+  && bitbake-layers add-layer ../../${project} \
   && printf "CORE_IMAGE_EXTRA_INSTALL += \" packagegroup-iotivity \"\n\n" \
-  | tee -a ./build/conf/local.conf \
+  | tee -a ../build/conf/local.conf \
   && sync
 
 USER nobody
@@ -99,6 +97,6 @@ RUN echo "#log: ${project}: Building sources" \
   && tail conf/bblayers.conf conf/local.conf \
   && bitbake packagegroup-iotivity -g -u knotty \
   && bitbake core-image-minimal \
-  && ls build/tmp*/deploy ||: \
+  && ls build*/ ||: \
   && rm -rf * \
   && sync
