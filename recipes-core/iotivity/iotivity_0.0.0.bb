@@ -1,7 +1,7 @@
 # TODO:
 # echo 'PREFERRED_VERSION_iotivity="0.0.0"' >> build/conf/local.conf
 
-PR ?= "r1"
+PR ?= "r0"
 #SRCREV  = "${AUTOREV}"
 #PV = "0+git${SRCPV}"
 #S  = "${WORKDIR}/git"
@@ -25,7 +25,7 @@ url_iotivity ?= "${baseurl_iotivity};destsuffix=${S};branch=${branch_iotivity};p
 SRC_URI = "${url_iotivity}"
 
 url_tinycbor = "git://github.com/01org/tinycbor.git"
-SRCREV_tinycbor = "31c7f81d45d115d2007b1c881cbbd3a19618465c"
+SRCREV_tinycbor = "3cdb9c890b785fac25e68e5db19961cfbf49aba3"
 SRC_URI += "${url_tinycbor};name=tinycbor;destsuffix=${S}/extlibs/tinycbor/tinycbor;protocol=http"
 
 url_gtest = "https://github.com/google/googletest/archive/release-1.7.0.zip"
@@ -42,21 +42,14 @@ SRCREV_mbedtls = "85c2a928ed352845793db000e78e2b42c8dcf055"
 url_mbedtls="git://github.com/ARMmbed/mbedtls.git"
 SRC_URI += "${url_mbedtls};name=mbedtls;destsuffix=${S}/extlibs/mbedtls/mbedtls;protocol=http"
 
-#TODO https://github.com/miloyip/rapidjson/archive/v1.0.2.zip
 url_rapidjson = "git://github.com/miloyip/rapidjson.git"
 SRCREV_rapidjson = "3d5848a7cd3367c5cb451c6493165b7745948308"
-#SRCREV_rapidjson = "v1.0.2""
-SRC_URI += "${url_rapidjson};name=rapidjson;destsuffix=${S}/extlibs/rapidjson/rapidjson;protocol=http;nobranch=1"
+SRC_URI += "${url_rapidjson};name=rapidjson;;nobranch=1;destsuffix=${S}/extlibs/rapidjson/rapidjson;protocol=http"
+
 branch_libcoap = "IoTivity-1.2.1d"
 SRCREV_libcoap = "${branch_libcoap}"
 url_libcoap = "git://github.com/dthaler/libcoap.git"
 SRC_URI += "${url_libcoap};name=libcoap;destsuffix=${S}/extlibs/libcoap/libcoap;protocol=http;nobranch=1"
-
-#TODO: check
-#url_rapidjson = "https://github.com/miloyip/rapidjson/archive/v1.0.2.zip"
-#SRC_URI += "${url_rapidjson};name=rapidjson;subdir=${BP}/extlibs/rapidjson"
-#SRC_URI[rapidjson.md5sum] = "446a0673d58766e507d641412988dcaa"
-#SRC_URI[rapidjson.sha256sum] = "69e876bd07670189214f44475add2e0afb8374e5798270208488c973a95f501d"
 
 inherit pkgconfig scons
 
@@ -70,16 +63,19 @@ python () {
     EXTRA_OESCONS += " VERBOSE=1"
  #  EXTRA_OESCONS += " --install-sandbox=${D}"
     # Aligned to default configuration, but features can be changed here (at your own risk):
-    EXTRA_OESCONS += " -j1"
+#   EXTRA_OESCONS += " -j1"
+#   EXTRA_OESCONS += " ERROR_ON_WARN=False"
     # EXTRA_OESCONS += " ROUTING=GW"
     # EXTRA_OESCONS += " SECURED=0"
     # EXTRA_OESCONS += " TCP=1"
+
     d.setVar("EXTRA_OESCONS", EXTRA_OESCONS)
 }
 
 
 IOTIVITY_BIN_DIR = "${libdir}/${PN}"
 IOTIVITY_BIN_DIR_D = "${D}${IOTIVITY_BIN_DIR}"
+
 
 do_compile_prepend() {
     export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}"
@@ -343,10 +339,13 @@ FILES_${PN}-tests = "\
         ${IOTIVITY_BIN_DIR}/tests \
         ${libdir}/liboctbstack_test.so"
 
-PACKAGES = "${PN}-tests-dbg ${PN}-tests ${PN}-plugins-dbg ${PN}-plugins-staticdev ${PN}-plugins-samples-dbg ${PN}-plugins-samples ${PN}-resource-dbg ${PN}-resource ${PN}-resource-dev ${PN}-resource-thin-staticdev ${PN}-resource-samples-dbg ${PN}-resource-samples ${PN}-service-dbg ${PN}-service ${PN}-service-dev ${PN}-service-staticdev ${PN}-service-samples-dbg ${PN}-service-samples ${PN}-dev ${PN} ${PN}-tools"
+FILES_${PN}-tools = "\
+        ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', '', '${IOTIVITY_BIN_DIR}/json2cbor', d)}"
+
+PACKAGES = "${PN}-tests-dbg ${PN}-tests ${PN}-plugins-dbg ${PN}-plugins-staticdev ${PN}-plugins-samples-dbg ${PN}-plugins-samples ${PN}-resource-dbg ${PN}-resource ${PN}-resource-dev ${PN}-resource-thin-staticdev ${PN}-resource-samples-dbg ${PN}-resource-samples ${PN}-service-dbg ${PN}-service ${PN}-service-dev ${PN}-service-staticdev ${PN}-service-samples-dbg ${PN}-service-samples ${PN}-tools ${PN}-dev ${PN}"
 ALLOW_EMPTY_${PN} = "1"
 RDEPENDS_${PN} += "boost"
-RRECOMMENDS_${PN} += " ${PN}-service"
+RRECOMMENDS_${PN} += "${PN}-resource ${PN}-service"
 RRECOMMENDS_${PN}-dev += "${PN}-resource-dev ${PN}-resource-thin-staticdev ${PN}-plugins-staticdev ${PN}-service-dev ${PN}-service-staticdev"
 RDEPENDS_${PN}-resource += "glib-2.0"
 RRECOMMENDS_${PN}-plugins-staticdev += "${PN}-resource-dev ${PN}-resource-thin-staticdev ${PN}-resource"
@@ -359,3 +358,4 @@ RDEPENDS_${PN}-service-samples += "${PN}-service ${PN}-resource glib-2.0"
 RDEPENDS_${PN}-service += "${PN}-resource glib-2.0"
 RDEPENDS_${PN}-tools += "${PN}-resource"
 BBCLASSEXTEND = "native nativesdk"
+
