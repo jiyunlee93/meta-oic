@@ -111,7 +111,7 @@ scon_do_install() {
 }
 
 do_install() {
-scon_do_install
+    scon_do_install
     cd ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/
 
     #Resource Tests
@@ -171,44 +171,12 @@ scon_do_install
     copy_exec service/scene-manager/unittests/scene_list_test ${IOTIVITY_BIN_DIR_D}/tests/service/scene-manager
     copy_exec service/scene-manager/unittests/scene_test ${IOTIVITY_BIN_DIR_D}/tests/service/scene-manager
 
-    # rm ${D}${libdir}/libmbedtls.a
-    # rm ${D}${libdir}/liboctbstack_internal.a
-    # rm ${D}${libdir}/libocpmapi.a
-    # rm ${D}${libdir}/liboc_internal.a
-    # rm ${D}${libdir}/libmbedcrypto.a
-    # rm ${D}${libdir}/libmbedx509.a
-    # rm ${D}${libdir}/libnotification_provider_wrapper.a
-    # rm ${D}${libdir}/libocpmapi_internal.a
-    # rm ${D}${libdir}/libminipluginmanager.a
-    # rm ${D}${libdir}/liboc_logger_internal.a
-    # rm ${D}${libdir}/liblogger.a
-    # rm ${D}${libdir}/libcjson.a
-    # rm ${D}${libdir}/libnotification_consumer_wrapper.a
-    # rm ${D}${libdir}/libESEnrolleeSDK.a
-    # rm ${D}${libdir}/libmpmcommon.a
-    # rm ${D}${libdir}/libconnectivity_abstraction_internal.a
-    # rm ${D}${libdir}/libnotification_consumer.a
-    # rm ${D}${libdir}/libESMediatorRich.a
-    # rm ${D}${libdir}/libcoap_http_proxy.a
-    # rm ${D}${libdir}/libipca_static.a
-    # rm ${D}${libdir}/libnotification_provider.a
-
-    #Adapt unaligned pkconfig (transitionnal)
-#    sed -e 's|^prefix=.*|prefix=/usr|g' -i ${S}/iotivity.pc
- #   make_dir ${D}${libdir}/pkgconfig/
-  #  copy_file ${S}/iotivity.pc ${D}${libdir}/pkgconfig/
-    #Installed headers
-#    make_dir ${D}${includedir}
-#    copy_file_recursive \
- #      ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/include \
-  #     ${D}${includedir}/iotivity
-
     # TODO: Support legacy path (transitional, use pkg-config)
-    ln -s iotivity/resource ${D}${includedir}/
-    ln -s iotivity/service ${D}${includedir}/
-    ln -s iotivity/c_common ${D}${includedir}/
+    ln -s iotivity/resource ${D}${includedir}/resource
+    ln -s iotivity/service ${D}${includedir}/service
+    ln -s iotivity/c_common ${D}${includedir}/c_common
 
-    find "${D}" -type f -perm /u+x -exec chrpath -d "{}" \;
+    find "${D}" -type f -perm u+x -exec chrpath -d "{}" \;
     find "${D}" -type f -iname "lib*.so" -exec chrpath -d "{}" \;
 #TODO
     rm -rf ${D}/usr/src/debug/iotivity
@@ -221,10 +189,6 @@ scon_do_install
 #Service Samples: iotivity-service-samples, iotivity-service-samples-dbg
 #Tests: iotivity-tests, iotivity-tests-dbg
 #Misc: iotivity-tools
-
-FILES_${PN}-tools = "\
-        ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', '', '${libdir}/${PN}/resource/csdk/security/tool/json2cbor', d)}"
-
 
 FILES_${PN}-resource-dev = "\
         ${includedir}/iotivity/resource \
