@@ -63,15 +63,15 @@ python () {
     EXTRA_OESCONS += " VERBOSE=1"
  #  EXTRA_OESCONS += " --install-sandbox=${D}"
     # Aligned to default configuration, but features can be changed here (at your own risk):
-#   EXTRA_OESCONS += " -j1"
+    EXTRA_OESCONS += " -j1"
 #   EXTRA_OESCONS += " ERROR_ON_WARN=False"
     # EXTRA_OESCONS += " ROUTING=GW"
     # EXTRA_OESCONS += " SECURED=0"
     # EXTRA_OESCONS += " TCP=1"
 #TODO:
-    EXTRA_OESCONS += "TARGET_TRANRSPORT=IP"
-    EXTRA_OESCONS += "WITH_CLOUD=true"
-    EXTRA_OESCONS += "WITH_MQ=PUB,SUB"
+    EXTRA_OESCONS += " TARGET_TRANRSPORT=IP"
+    EXTRA_OESCONS += " WITH_CLOUD=true"
+    EXTRA_OESCONS += " WITH_MQ=PUB,SUB"
     d.setVar("EXTRA_OESCONS", EXTRA_OESCONS)
 }
 
