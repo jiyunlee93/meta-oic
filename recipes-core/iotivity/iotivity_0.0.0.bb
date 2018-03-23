@@ -63,14 +63,15 @@ python () {
     EXTRA_OESCONS += " VERBOSE=1"
  #  EXTRA_OESCONS += " --install-sandbox=${D}"
     # Aligned to default configuration, but features can be changed here (at your own risk):
-    EXTRA_OESCONS += " -j1"
+    EXTRA_OESCONS += " -j4"
 #   EXTRA_OESCONS += " ERROR_ON_WARN=False"
     # EXTRA_OESCONS += " ROUTING=GW"
     # EXTRA_OESCONS += " SECURED=0"
     # EXTRA_OESCONS += " TCP=1"
 #TODO:
     EXTRA_OESCONS += " TARGET_TRANRSPORT=IP"
-    EXTRA_OESCONS += " WITH_CLOUD=true"
+    EXTRA_OESCONS += " WITH_CLOUD=True"
+    EXTRA_OESCONS += " WITH_TCP=True"
     EXTRA_OESCONS += " WITH_MQ=PUB,SUB"
     d.setVar("EXTRA_OESCONS", EXTRA_OESCONS)
 }
@@ -117,69 +118,32 @@ do_install() {
     scon_do_install
     cd ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/
 
-    #Resource Tests
-    make_dir ${IOTIVITY_BIN_DIR_D}/tests/resource
-    copy_exec resource/c_common/ocrandom/test/randomtests ${IOTIVITY_BIN_DIR_D}/tests/resource/ocrandom_tests
-    copy_exec resource/unittests/unittests ${IOTIVITY_BIN_DIR_D}/tests/resource/oc_unittests
 #   copy_file resource/unittests/oic_svr_db_client.dat ${IOTIVITY_BIN_DIR_D}/tests/resource
-    copy_exec resource/csdk/stack/test/stacktests ${IOTIVITY_BIN_DIR_D}/tests/resource/octbstack_tests
-    copy_exec resource/csdk/connectivity/test/catests ${IOTIVITY_BIN_DIR_D}/tests/resource/ca_tests
 #   copy_exec resource/oc_logger/examples/examples_cpp ${IOTIVITY_BIN_DIR_D}/tests/resource/logger_test_cpp
 #   copy_exec resource/oc_logger/examples/examples_c ${IOTIVITY_BIN_DIR_D}/tests/resource/logger_test_c
-    if ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', 'false', 'true', d)}; then
-        copy_exec resource/csdk/security/unittest/unittest ${IOTIVITY_BIN_DIR_D}/tests/resource/security_tests
-    fi
 
-    #Tests
-    make_dir ${IOTIVITY_BIN_DIR_D}/tests/plugins/zigbee/
-    copy_exec plugins/unittests/piunittests ${IOTIVITY_BIN_DIR_D}/tests/plugins/zigbee
 
     #Resource container tests
     make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/resource-container
     copy_exec service/resource-container/unittests/container_test ${IOTIVITY_BIN_DIR_D}/tests/service/resource-container
-    copy_file service/resource-container/unittests/libTestBundle.so ${IOTIVITY_BIN_DIR_D}/tests/service/resource-container
     copy_file service/resource-container/unittests/ResourceContainerInvalidConfig.xml ${IOTIVITY_BIN_DIR_D}/tests/service/resource-container
     copy_file service/resource-container/unittests/ResourceContainerTestConfig.xml ${IOTIVITY_BIN_DIR_D}/tests/service/resource-container
     copy_file service/resource-container/unittests/libTestBundle.so ${D}${libdir}
-
-    #Resource encapsulation test
-    make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation/resource-broker
-    make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation/resource-cache
-    make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation/common
-    make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation/server-builder
-    copy_exec service/resource-encapsulation/unittests/rcs_client_test ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation
-    copy_exec service/resource-encapsulation/src/resourceBroker/unittest/broker_test ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation/resource-broker
-    copy_exec service/resource-encapsulation/src/resourceCache/unittests/cache_test ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation/resource-cache
 #TODO
-    copy_exec service/resource-encapsulation/src/common/primitiveResource/unittests/rcs_common_test ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation/common
-    copy_exec service/resource-encapsulation/src/serverBuilder/rcs_server_test ${IOTIVITY_BIN_DIR_D}/tests/service/resource-encapsulation/server-builder
 
     #Easy setup tests
-    if ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', 'true', 'false', d)}; then
-        make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/easy-setup
-        copy_exec service/easy-setup/mediator/richsdk/unittests/easysetup_mediator_test ${IOTIVITY_BIN_DIR_D}/tests/service/easy-setup
-    fi
+#    if ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', 'true', 'false', d)}; then
+ #       make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/easy-setup
+  #      copy_exec service/easy-setup/mediator/richsdk/unittests/easysetup_mediator_test ${IOTIVITY_BIN_DIR_D}/tests/service/easy-setup
+   # fi
 
-    #Notification tests
-    if ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=1', 'false', 'true', d)}; then
-        make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/notification
-        copy_exec service/notification/unittest/notification_consumer_test ${IOTIVITY_BIN_DIR_D}/tests/service/notification
-        copy_exec service/notification/unittest/notification_provider_test ${IOTIVITY_BIN_DIR_D}/tests/service/notification
-    fi
-
-    #Scene manager tests
-    make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/scene-manager
-    copy_exec service/scene-manager/unittests/scene_action_test ${IOTIVITY_BIN_DIR_D}/tests/service/scene-manager
-    copy_exec service/scene-manager/unittests/scene_collection_test ${IOTIVITY_BIN_DIR_D}/tests/service/scene-manager
-    copy_exec service/scene-manager/unittests/scene_list_test ${IOTIVITY_BIN_DIR_D}/tests/service/scene-manager
-    copy_exec service/scene-manager/unittests/scene_test ${IOTIVITY_BIN_DIR_D}/tests/service/scene-manager
 
     # TODO: Support legacy path (transitional, use pkg-config)
     ln -s iotivity/resource ${D}${includedir}/resource
     ln -s iotivity/service ${D}${includedir}/service
     ln -s iotivity/c_common ${D}${includedir}/c_common
 
-    find "${D}" -type f -perm u+x -exec chrpath -d "{}" \;
+    find "${D}" -type f -perm /u+x -exec chrpath -d "{}" \;
     find "${D}" -type f -iname "lib*.so" -exec chrpath -d "{}" \;
 #TODO
     rm -rf ${D}/usr/src/debug/iotivity
@@ -192,6 +156,15 @@ do_install() {
 #Service Samples: iotivity-service-samples, iotivity-service-samples-dbg
 #Tests: iotivity-tests, iotivity-tests-dbg
 #Misc: iotivity-tools
+
+FILES_${PN}-tests-dbg = "\
+        ${IOTIVITY_BIN_DIR}/tests/**/.debug \
+        ${libdir}/.debug/libgtest.so \
+        ${libdir}/.debug/libgtest_main.so"
+
+FILES_${PN}-tests = "\
+        ${IOTIVITY_BIN_DIR}/tests/** \
+        ${libdir}/liboctbstack_test.so"
 
 FILES_${PN}-resource-dev = "\
         ${includedir}/iotivity/resource \
@@ -290,21 +263,6 @@ FILES_${PN}-service-samples-dbg = "\
 
 FILES_${PN}-service-samples = "\
         ${IOTIVITY_BIN_DIR}/service/**"
-
-FILES_${PN}-tests-dbg = "\
-        ${libdir}/.debug/libgtest.so \
-        ${libdir}/.debug/libgtest_main.so \
-        ${IOTIVITY_BIN_DIR}/tests/service/easy-setup/.debug \
-        ${IOTIVITY_BIN_DIR}/tests/service/notification/.debug \
-        ${IOTIVITY_BIN_DIR}/tests/resource/.debug \
-        ${IOTIVITY_BIN_DIR}/tests/service/resource-container/.debug \
-        ${IOTIVITY_BIN_DIR}/tests/service/resource-encapsulation/.debug \
-        ${IOTIVITY_BIN_DIR}/tests/service/scene-manager/.debug \
-        ${IOTIVITY_BIN_DIR}/tests/plugins/zigbee/.debug"
-
-FILES_${PN}-tests = "\
-        ${IOTIVITY_BIN_DIR}/tests \
-        ${libdir}/liboctbstack_test.so"
 
 FILES_${PN}-tools = "\
         ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', '', '${IOTIVITY_BIN_DIR}/json2cbor', d)}"
