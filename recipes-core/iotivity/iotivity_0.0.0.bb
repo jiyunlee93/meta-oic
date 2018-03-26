@@ -63,16 +63,15 @@ python () {
     EXTRA_OESCONS += " VERBOSE=1"
  #  EXTRA_OESCONS += " --install-sandbox=${D}"
     # Aligned to default configuration, but features can be changed here (at your own risk):
-    EXTRA_OESCONS += " -j4"
+    EXTRA_OESCONS += " -j1"
 #   EXTRA_OESCONS += " ERROR_ON_WARN=False"
     # EXTRA_OESCONS += " ROUTING=GW"
     # EXTRA_OESCONS += " SECURED=0"
     # EXTRA_OESCONS += " TCP=1"
-#TODO:
-    EXTRA_OESCONS += " TARGET_TRANRSPORT=IP"
-    EXTRA_OESCONS += " WITH_CLOUD=True"
-    EXTRA_OESCONS += " WITH_TCP=True"
-    EXTRA_OESCONS += " WITH_MQ=PUB,SUB"
+#    EXTRA_OESCONS += " TARGET_TRANRSPORT=IP"
+#    EXTRA_OESCONS += " WITH_CLOUD=True"
+#    EXTRA_OESCONS += " WITH_TCP=True"
+#    EXTRA_OESCONS += " WITH_MQ=PUB,SUB"
     d.setVar("EXTRA_OESCONS", EXTRA_OESCONS)
 }
 
@@ -116,27 +115,8 @@ scon_do_install() {
 
 do_install() {
     scon_do_install
-    cd ${S}/out/yocto/${IOTIVITY_TARGET_ARCH}/release/
-
-#   copy_file resource/unittests/oic_svr_db_client.dat ${IOTIVITY_BIN_DIR_D}/tests/resource
-#   copy_exec resource/oc_logger/examples/examples_cpp ${IOTIVITY_BIN_DIR_D}/tests/resource/logger_test_cpp
-#   copy_exec resource/oc_logger/examples/examples_c ${IOTIVITY_BIN_DIR_D}/tests/resource/logger_test_c
-
-
-    #Resource container tests
-    make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/resource-container
-    copy_exec service/resource-container/unittests/container_test ${IOTIVITY_BIN_DIR_D}/tests/service/resource-container
-    copy_file service/resource-container/unittests/ResourceContainerInvalidConfig.xml ${IOTIVITY_BIN_DIR_D}/tests/service/resource-container
-    copy_file service/resource-container/unittests/ResourceContainerTestConfig.xml ${IOTIVITY_BIN_DIR_D}/tests/service/resource-container
-    copy_file service/resource-container/unittests/libTestBundle.so ${D}${libdir}
-#TODO
-
-    #Easy setup tests
-#    if ${@bb.utils.contains('EXTRA_OESCONS', 'SECURED=0', 'true', 'false', d)}; then
- #       make_dir ${IOTIVITY_BIN_DIR_D}/tests/service/easy-setup
-  #      copy_exec service/easy-setup/mediator/richsdk/unittests/easysetup_mediator_test ${IOTIVITY_BIN_DIR_D}/tests/service/easy-setup
-   # fi
-
+    # TODO: Add conveinance link to support tests 
+    # ln -fs ${D}${libdir}/iotivity/tests/service/resource-container/service/resource-container/unittests/libTestBundle.so ${D}${libdir}
 
     # TODO: Support legacy path (transitional, use pkg-config)
     ln -s iotivity/resource ${D}${includedir}/resource
@@ -168,7 +148,9 @@ FILES_${PN}-tests = "\
 
 FILES_${PN}-resource-dev = "\
         ${includedir}/iotivity/resource \
-        ${includedir}/iotivity/extlibs \
+        ${includedir}/iotivity/c_common \
+        ${includedir}/resource \
+        ${includedir}/c_common \
         ${libdir}/pkgconfig/iotivity.pc"
 
 FILES_${PN}-resource-thin-staticdev = "\
@@ -231,7 +213,8 @@ FILES_${PN}-service-dbg = "\
         ${libdir}/.debug"
 
 FILES_${PN}-service-dev = "\
-        ${includedir}/iotivity/service"
+        ${includedir}/iotivity/service \
+        ${includedir}/service"
 
 FILES_${PN}-service = "\
         ${libdir}/lib*plugin.so \
@@ -240,7 +223,6 @@ FILES_${PN}-service = "\
         ${libdir}/libESEnrolleeSDK.so \
         ${libdir}/libESMediatorRich.so \
         ${libdir}/libHueBundle.so \
-        ${libdir}/libTestBundle.so \
         ${libdir}/libipca.so \
         ${libdir}/libnotification_*.so \
         ${libdir}/librcs_client.so \
@@ -283,4 +265,3 @@ RDEPENDS_${PN}-service-samples += "${PN}-service ${PN}-resource glib-2.0"
 RDEPENDS_${PN}-service += "${PN}-resource glib-2.0"
 RDEPENDS_${PN}-tools += "${PN}-resource"
 BBCLASSEXTEND = "native nativesdk"
-
